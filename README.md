@@ -1,5 +1,5 @@
-## Reddit Comments Web Scraper
-This is a web scraper for reddit comments. I am building this so I can analyze the comments I received about my app as data.
+## Reddit Scraper
+This scrapes reddit comments and imports them into a Google Sheet. I am building this so I can analyze the comments I received about my app as data/proof of concept.
 
 ## Development Stage
 <p>July 3, 2025</p>
