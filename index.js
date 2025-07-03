@@ -28,27 +28,50 @@ async function fetchComments(postID) {
         const submission = await reddit.getSubmission(postID).fetch();
 
         // Fetch more comments if needed (e.g. up to 150)
-        const comments = await submission.comments.fetchMore({ amount: 200, skipReplies: false });
+        let comments = await submission.comments.fetchMore({ amount: Infinity, skipReplies: false });
 
-        // Count how many comments
-        console.log(`Fetched ${comments.length} comments from post ${postID}`);
+        let allReplies = [];
+        for (const c of comments) {
+            const replies = await collectAllReplies(c);
+            allReplies.push(...replies);
+        };
 
-        // Optional: log first comment body to confirm
+        // Log first comment body to confirm
         if (comments.length > 0) {
             console.log('Sample comment:', comments[1].body);
         };
 
-        return comments;
+        // Count how many comments
+        console.log(`Fetched ${comments.length} top-level comments from post ${postID}`);
+        console.log(`Fetched ${allReplies.length} nested replies`);
+console.log(`Total: ${comments.length + allReplies.length}`);
+
+        return [...comments, ...allReplies];
     } catch(err) {
         console.error(`Error fetching comments for post ${postID}:`, err);
         return [];
     };
 };
 
+async function collectAllReplies(comment) {
+  let results = []  ;
+  if(comment.replies && comment.replies.length > 0) {
+    for(const reply of comment.replies) {
+        if(reply instanceof snoowrap.objects.More) {
+            const moreReplies = await reply.fetchMore();
+            for (const mr of moreReplies) {
+            results.push(...await collectAllReplies(mr));
+            };
+        } else {
+            results.push(reply);
+            results.push(...await collectAllReplies(reply));
+        };
+    };
+  };
+  return results;
+};
+
 (async () => {
   const comments1 = await fetchComments(process.env.POST_ID1);
   const comments2 = await fetchComments(process.env.POST_ID2);
-
-  console.log(`Comments 1: ${comments1.length}`);
-  console.log(`Comments 2: ${comments2.length}`);
 })();
