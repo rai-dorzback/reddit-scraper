@@ -45,9 +45,8 @@ async function writeCommentsToSheet(commentsArray, spreadsheetId, sheetName) {
         }
     });
 
-    console.log(`✅ Wrote ${commentsArray.length} comments to Google Sheet.`);
+    console.log(`Wrote ${commentsArray.length} comments to Google Sheet.`);
 };
-
 
 /* ====== REDDIT ====== */
 // Set up Reddit client
@@ -59,14 +58,14 @@ const reddit = new snoowrap({
   password: process.env.REDDIT_PASSWORD,
 });
 
-console.log('✅ Reddit API authenticated.');
+console.log('Reddit API authenticated.');
 
 // test that it works to log into reddit
-reddit.getMe().then(user => {
-  console.log('Logged in as:', user.name);
-}).catch(err => {
-  console.error('Reddit login failed:', err);
-});
+// reddit.getMe().then(user => {
+//   console.log('Logged in as:', user.name);
+// }).catch(err => {
+//   console.error('Reddit login failed:', err);
+// });
 
 // fetch comments from reddit post
 async function fetchComments(postID) {
