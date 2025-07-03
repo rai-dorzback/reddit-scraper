@@ -27,18 +27,14 @@ async function fetchComments(postID) {
         // Get the submission object and fetch full data
         const submission = await reddit.getSubmission(postID).fetch();
 
-        // Fetch more comments if needed (e.g. up to 150)
+        // Fetch all comments
         let comments = await submission.comments.fetchMore({ amount: Infinity, skipReplies: false });
 
+        // Fetch all replies to the comments
         let allReplies = [];
         for (const c of comments) {
             const replies = await collectAllReplies(c);
             allReplies.push(...replies);
-        };
-
-        // Log first comment body to confirm
-        if (comments.length > 0) {
-            console.log('Sample comment:', comments[1].body);
         };
 
         // Count how many comments
@@ -46,7 +42,11 @@ async function fetchComments(postID) {
         console.log(`Fetched ${allReplies.length} nested replies`);
 console.log(`Total: ${comments.length + allReplies.length}`);
 
-        return [...comments, ...allReplies];
+        const allComments = [...comments, ...allReplies];
+
+        // extract fields
+        const extractedData = extractFields(allComments);
+        return extractedData
     } catch(err) {
         console.error(`Error fetching comments for post ${postID}:`, err);
         return [];
@@ -71,7 +71,27 @@ async function collectAllReplies(comment) {
   return results;
 };
 
-(async () => {
-  const comments1 = await fetchComments(process.env.POST_ID1);
-  const comments2 = await fetchComments(process.env.POST_ID2);
-})();
+function extractFields(allComments) {
+    const extractedData = allComments.map(c => ({
+        author: c.author ? c.author.name : '[deleted]',
+        body: c.body,
+        score: c.score,
+        permalink: `https://reddit.com${c.permalink}`,
+        created_utc: c.created_utc,
+        parent_id: c.parent_id
+    }));
+    return extractedData;
+};
+
+async function main() {
+    const comments1 = await fetchComments(process.env.POST_ID1);
+    const comments2 = await fetchComments(process.env.POST_ID2);
+
+    console.log(`Post 1: extracted ${comments1.length} comments`);
+    console.log(`Post 2: extracted ${comments2.length} comments`);
+
+    // Quick sample to confirm
+    console.log('Sample:', comments1[0]);
+};
+
+main();
