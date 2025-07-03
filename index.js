@@ -3,6 +3,53 @@ const snoowrap = require('snoowrap');
 // require dotenv
 require('dotenv').config({path: './.env'})
 
+/* ====== GOOGLE SHEETS ====== */
+const { google } = require('googleapis');
+const sheets = google.sheets('v4');
+const auth = new google.auth.GoogleAuth({
+  keyFile: './credentials.json',
+  scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+});
+
+async function writeCommentsToSheet(commentsArray, spreadsheetId, sheetName) {
+    const authClient = await auth.getClient();
+
+    // Prepare rows (first row = headers)
+    const rows = [
+        ['Author', 'Body', 'Score', 'Permalink', 'Created UTC', 'Parent ID'],
+        ...commentsArray.map(comment => [
+        comment.author,
+        comment.body,
+        comment.score,
+        comment.permalink,
+        comment.created_utc,
+        comment.parent_id
+        ])
+    ];
+
+    // Clear existing data
+    sheets.spreadsheets.values.clear({
+        auth: authClient,
+        spreadsheetId,
+        range: sheetName
+    });
+
+    // Write new data
+    sheets.spreadsheets.values.update({
+        auth: authClient,
+        spreadsheetId,
+        range: sheetName,
+        valueInputOption: 'RAW',
+        requestBody: {
+            values: rows
+        }
+    });
+
+    console.log(`✅ Wrote ${commentsArray.length} comments to Google Sheet.`);
+};
+
+
+/* ====== REDDIT ====== */
 // Set up Reddit client
 const reddit = new snoowrap({
   userAgent: process.env.USER_AGENT,
@@ -38,9 +85,9 @@ async function fetchComments(postID) {
         };
 
         // Count how many comments
-        console.log(`Fetched ${comments.length} top-level comments from post ${postID}`);
-        console.log(`Fetched ${allReplies.length} nested replies`);
-console.log(`Total: ${comments.length + allReplies.length}`);
+//         console.log(`Fetched ${comments.length} top-level comments from post ${postID}`);
+//         console.log(`Fetched ${allReplies.length} nested replies`);
+// console.log(`Total: ${comments.length + allReplies.length}`);
 
         const allComments = [...comments, ...allReplies];
 
@@ -87,11 +134,13 @@ async function main() {
     const comments1 = await fetchComments(process.env.POST_ID1);
     const comments2 = await fetchComments(process.env.POST_ID2);
 
-    console.log(`Post 1: extracted ${comments1.length} comments`);
-    console.log(`Post 2: extracted ${comments2.length} comments`);
+    const allComments = [...comments1, ...comments2];
 
-    // Quick sample to confirm
-    console.log('Sample:', comments1[0]);
+    await writeCommentsToSheet(
+    allComments,
+        process.env.SHEET_ID,
+        'Sheet1' // or your actual tab name
+    );
 };
 
 main();
