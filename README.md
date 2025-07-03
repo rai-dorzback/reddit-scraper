@@ -3,6 +3,6 @@ This scrapes reddit comments and imports them into a Google Sheet. I am building
 
 ## Development Stage
 <p>July 3, 2025</p>
-- First, I had to (set up a Reddit Script key)[https://www.reddit.com/prefs/apps] in order to access the comments.
-- Then, I had to (get a Google Sheets API Key)[https://developers.google.com/workspace/sheets/api/quickstart/nodejs]. I had to create a Google Cloud project and then enable the Google Sheets API.
+- First, I had to [set up a Reddit Script key](https://www.reddit.com/prefs/apps) in order to access the comments.
+- Then, I had to get a [Google Sheets API Key](https://developers.google.com/workspace/sheets/api/quickstart/nodejs). I had to create a Google Cloud project and then enable the Google Sheets API.
 - I had to play around a lot with the snoowrap package in order to get ALL of the comments and replies, not just the top-level ones.
