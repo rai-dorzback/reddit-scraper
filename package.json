@@ -1,0 +1,18 @@
+{
+  "name": "reddit-scraper",
+  "version": "1.0.0",
+  "description": "This is a web scraper for reddit comments. I am building this so I can analyze the comments I received about my app as data.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "dotenv": "^17.0.1",
+    "googleapis": "^105.0.0",
+    "snoowrap": "^1.15.2"
+  }
+}
